@@ -214,7 +214,6 @@ if __name__ == "__main__":
                     else:
                         raw_responses.append(resp)
                         response_accuracies.append("FALSE")
-            print(f"{i}) Normal")
             reaction_times.append(rt)
 
     # Notify user of their performance
