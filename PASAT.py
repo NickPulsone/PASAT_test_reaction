@@ -10,6 +10,7 @@ import csv
 import soundfile
 import speech_recognition as sr
 import os
+from math import isnan
 
 """ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  TUNABLE PARAMETERS    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ """
 # Trial name (subject name, etc)
@@ -19,12 +20,12 @@ TEST_QUESTION_FILENAME = "PASAT_versionA_HO.mat"
 # Pause time in seconds
 DELAY = 2.0
 # Number of tests (Max 60)
-NUM_TESTS = 15
+NUM_TESTS = 60
 # NUM_TESTS = 60
 # The highest audio level (in dB) the program will determine to be considered "silence"
 SILENCE_THRESHOLD_DB = -20.0
 # The minimum period, in milliseconds, that could distinguish two different responses
-MIN_PERIOD_SILENCE_MS = 500
+MIN_PERIOD_SILENCE_MS = 250
 """ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ """
 WORD_TO_NUM = {"ONE": 1, "TWO": 2, "THREE": 3, "FOUR": 4, "FIVE": 5, "SIX": 6, "SEVEN": 7, "EIGHT": 8, "NINE": 9,
                "TEN": 10}
@@ -56,7 +57,7 @@ if __name__ == "__main__":
     print("Starting the recording...")
 
     # Define recording parameters and start recording
-    rec_seconds = int(NUM_TESTS) * (DELAY + 0.5)
+    rec_seconds = int(NUM_TESTS) * (DELAY + 1.0) + 2
     rec_sample_rate = 44100
     myrecording = sd.rec(int(rec_seconds * rec_sample_rate), samplerate=rec_sample_rate, channels=1)
     recording_start_time = datetime.datetime.now()
@@ -120,27 +121,27 @@ if __name__ == "__main__":
         response_timing_markers = np.delete(response_timing_markers, 0)
         response_timing_chunks = np.delete(response_timing_chunks, 0, 0)
 
-        # Create a folder to store the individual responses as clips to help determine
-        # response accuracies later on.
-        clip_seperation_path = TRIAL_NAME + "_reponse_chunks"
-        if not os.path.isdir(clip_seperation_path):
-            os.mkdir(clip_seperation_path)
-        # How much we add (ms) to the ends of a clip when saved
-        clip_threshold = 600
-        for i in range(len(response_timing_chunks)):
-            chunk = response_timing_chunks[i]
-            chunk_filename = os.path.join(clip_seperation_path, f"chunk{i}.wav")
-            # Save the chunk as a serperate wav, acounting for the fact it could be at the very beggining or end
-            if chunk[0] <= clip_threshold:
-                (audio_segment[0:chunk[1] + clip_threshold]).export(chunk_filename, format="wav")
-            elif chunk[1] >= ((rec_seconds * 1000.0) - clip_threshold - 1):
-                (audio_segment[chunk[0] - clip_threshold:(rec_seconds * 1000) - 1]).export(chunk_filename, format="wav")
-            else:
-                (audio_segment[chunk[0] - clip_threshold:chunk[1] + clip_threshold]).export(chunk_filename,
-                                                                                            format="wav")
-            # Reformat the wav files using soundfile to allow for speech recongition, and store in folder
-            data, samplerate = soundfile.read(chunk_filename)
-            soundfile.write(chunk_filename, data, samplerate, subtype='PCM_16')
+    # Create a folder to store the individual responses as clips to help determine
+    # response accuracies later on.
+    clip_seperation_path = TRIAL_NAME + "_reponse_chunks"
+    if not os.path.isdir(clip_seperation_path):
+        os.mkdir(clip_seperation_path)
+    # How much we add (ms) to the ends of a clip when saved
+    clip_threshold = 600
+    for i in range(len(response_timing_chunks)):
+        chunk = response_timing_chunks[i]
+        chunk_filename = os.path.join(clip_seperation_path, f"chunk{i}.wav")
+        # Save the chunk as a serperate wav, acounting for the fact it could be at the very beggining or end
+        if chunk[0] <= clip_threshold:
+            (audio_segment[0:chunk[1] + clip_threshold]).export(chunk_filename, format="wav")
+        elif chunk[1] >= ((rec_seconds * 1000.0) - clip_threshold - 1):
+            (audio_segment[chunk[0] - clip_threshold:(rec_seconds * 1000) - 1]).export(chunk_filename, format="wav")
+        else:
+            (audio_segment[chunk[0] - clip_threshold:chunk[1] + clip_threshold]).export(chunk_filename,
+                                                                                        format="wav")
+        # Reformat the wav files using soundfile to allow for speech recongition, and store in folder
+        data, samplerate = soundfile.read(chunk_filename)
+        soundfile.write(chunk_filename, data, samplerate, subtype='PCM_16')
 
     # Create an array to hold users response accuracy (TRUE, FALSE, or N/A)
     response_accuracies = []
@@ -167,7 +168,7 @@ if __name__ == "__main__":
                 if response_timing_markers[j] > stimuli_time_stamps[i]:
                     # If reaction is too fast, it means the program is considering a delayed response from previous stimulus
                     # Thus, we should continue the loop if that is the case, otherwise, break and store the reaction time
-                    if response_timing_markers[j] - stimuli_time_stamps[i] < 0.2 and len(reaction_times) > 0 and \
+                    if response_timing_markers[j] - stimuli_time_stamps[i] < 0.1 and len(reaction_times) > 0 and \
                             reaction_times[-1] > DELAY:
                         continue
                     rt = response_timing_markers[j] - stimuli_time_stamps[i]
@@ -175,7 +176,7 @@ if __name__ == "__main__":
             # If there is no nonsilent chunk after the time that the stimulus is displayed, store reaction time as "nan"
             # Also if the user's response is over 1.6s after the stimulus is displayed, then we know they either failed to
             # respond or the audio was not recorded and intepreted properly.
-            if j >= len(response_timing_markers):
+            if j >= len(response_timing_markers) or (rt > DELAY * 1.5):
                 reaction_times.append(float('nan'))
                 raw_responses.append("N/A")
                 response_accuracies.append("N/A")
@@ -185,7 +186,6 @@ if __name__ == "__main__":
                 clip_index_array[i] = j
                 # If the response was valid, detemine if it was correct using speech recognition
                 with sr.AudioFile(os.path.join(clip_seperation_path, f"chunk{j}.wav")) as source:
-                    clip_index_array[i] = j
                     # listen for the data (load audio to memory)
                     audio_data = r.record(source)
                     # recognize (convert from speech to text)
@@ -214,6 +214,7 @@ if __name__ == "__main__":
                     else:
                         raw_responses.append(resp)
                         response_accuracies.append("FALSE")
+            print(f"{i}) Normal")
             reaction_times.append(rt)
 
     # Notify user of their performance
@@ -223,7 +224,7 @@ if __name__ == "__main__":
     # Create another array to label each reactiontime according to if it was within the alloted time or not
     reaction_on_time = np.empty(NUM_TESTS, dtype=bool)
     for i in range(NUM_TESTS):
-        if reaction_times[i] > DELAY:
+        if reaction_times[i] > DELAY or isnan(reaction_times[i]):
             reaction_on_time[i] = False
         else:
             reaction_on_time[i] = True
