@@ -20,7 +20,7 @@ TEST_QUESTION_FILENAME = "PASAT_versionA_HO.mat"
 # Pause time in seconds
 DELAY = 2.0
 # Number of tests (Max 60)
-NUM_TESTS = 60
+NUM_TESTS = 5
 # NUM_TESTS = 60
 # The highest audio level (in dB) the program will determine to be considered "silence"
 SILENCE_THRESHOLD_DB = -20.0
@@ -189,19 +189,24 @@ if __name__ == "__main__":
                     # listen for the data (load audio to memory)
                     audio_data = r.record(source)
                     # recognize (convert from speech to text)
+                    resp = "Undetected"
+                    resp_backup = "Undetected"
                     try:
                         resp = (r.recognize_google(audio_data).split()[0])
                         if isinstance(resp, str):
                             resp = resp.upper()
-                        resp_backup = (r.recognize_sphinx(audio_data).split()[0]).upper()
-                        if isinstance(resp_backup, str):
-                            resp_backup = resp_backup.upper()
-                    # If no response can be determined, report accuracies as N/A, store reaction time, and move on
-                    except sr.UnknownValueError as err:
-                        response_accuracies.append("N/A")
-                        raw_responses.append("N/A")
-                        reaction_times.append(rt)
-                        continue
+                    except sr.UnknownValueError as err1:
+                        # recognize (convert from speech to text) with sphinx instead of google
+                        try:
+                            resp_backup = (r.recognize_sphinx(audio_data).split()[0]).upper()
+                            if isinstance(resp_backup, str):
+                                resp_backup = resp_backup.upper()
+                        # If no response can be determined, report accuracies as N/A, store reaction time, and move on
+                        except sr.UnknownValueError as err2:
+                            response_accuracies.append("N/A")
+                            raw_responses.append("N/A")
+                            reaction_times.append(rt)
+                            continue
                     if (resp.isnumeric() and answer_array[i] == int(resp)) or (resp in WORD_TO_NUM.keys() and WORD_TO_NUM[resp] == answer_array[i]):
                         response_accuracies.append("TRUE")
                         num_correct_responses += 1
