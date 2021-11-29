@@ -14,7 +14,7 @@ CSV_FILENAME = TRIAL_NAME + ".csv"
 # Pause time in seconds
 DELAY = 2.0
 # Number of tests (Max 60)
-NUM_TESTS = 15
+NUM_TESTS = 10
 # NUM_TESTS = 60
 # The highest audio level (in dB) the program will determine to be considered "silence"
 SILENCE_THRESHOLD_DB = -20.0
