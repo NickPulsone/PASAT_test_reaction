@@ -86,4 +86,4 @@ if __name__ == "__main__":
             ['1st number', '2nd number', 'Correct answer', 'Stimuli time from start (s)'])
         for i in range(NUM_TESTS):
             writer.writerow([number_array[i], number_array[i + 1], answer_array[i], stimuli_time_stamps[i]])
-    print("Done")
+    print("Done.")
