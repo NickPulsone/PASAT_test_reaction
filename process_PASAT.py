@@ -20,6 +20,9 @@ NUM_TESTS = 10
 SILENCE_THRESHOLD_DB = -20.0
 # The minimum period, in milliseconds, that could distinguish two different responses
 MIN_PERIOD_SILENCE_MS = 250
+# Indices/chunks to remove
+REMOVE_INDICES = []
+
 """ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ """
 WORD_TO_NUM = {"ONE": 1, "TWO": 2, "THREE": 3, "FOUR": 4, "FIVE": 5, "SIX": 6, "SEVEN": 7, "EIGHT": 8, "NINE": 9,
                "TEN": 10}
@@ -49,6 +52,7 @@ if __name__ == "__main__":
     stimuli_time_stamps = np.array(data[:, 3], dtype=float)
     NUM_TESTS = stimuli_time_stamps.size
 
+    print("Interpret data (this may take a while)...")
     # Open .wav with pydub
     audio_segment = AudioSegment.from_wav(TRIAL_NAME + ".wav")
     rec_seconds = audio_segment.duration_seconds
@@ -72,7 +76,10 @@ if __name__ == "__main__":
     while response_timing_markers[0] == 0.0:
         response_timing_markers = np.delete(response_timing_markers, 0)
         response_timing_chunks = np.delete(response_timing_chunks, 0, 0)
-
+    # Remove indices specified by user
+    if len(REMOVE_INDICES) != 0:
+        response_timing_markers = np.delete(response_timing_markers, REMOVE_INDICES, 0)
+        response_timing_chunks = np.delete(response_timing_chunks, REMOVE_INDICES, 0)
     # Create a folder to store the individual responses as clips to help determine
     # response accuracies later on.
     clip_seperation_path = TRIAL_NAME + "_reponse_chunks"
@@ -191,5 +198,4 @@ if __name__ == "__main__":
         for i in range(NUM_TESTS):
             writer.writerow([number_array[i], number_array[i + 1], raw_responses[i], answer_array[i],
                              response_accuracies[i], reaction_times[i], reaction_on_time[i], clip_index_array[i]])
-    print("Done")
-    
+    print("Done.")
