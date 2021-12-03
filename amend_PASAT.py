@@ -1,7 +1,6 @@
+#!/usr/bin/env/python
 import numpy as np
-from pydub import silence, AudioSegment
 import csv
-import soundfile
 import speech_recognition as sr
 import os
 from math import isnan
@@ -50,12 +49,13 @@ data = np.array(data)
 number_1_array = np.array(data[:, 0], dtype=int)
 number_2_array = np.array(data[:, 1], dtype=int)
 user_responses = np.array(data[:, 2], dtype=str)
-response_timing_markers = np.array(data[:, 3], dtype=float)
-correct_answers = np.array(data[:, 4], dtype=int)
-accuracy_array = np.array(data[:, 5], dtype=str)
-reaction_times = np.array(data[:, 6], dtype=float)
-reaction_on_time = np.array(data[:, 7], dtype=str)
-clip_index_array = np.array(data[:, 8], dtype=int)
+correct_answers = np.array(data[:, 3], dtype=int)
+accuracy_array = np.array(data[:, 4], dtype=str)
+reaction_times = np.array(data[:, 5], dtype=float)
+reaction_on_time = np.array(data[:, 6], dtype=str)
+clip_index_array = np.array(data[:, 7], dtype=int)
+response_timing_markers = np.array(data[:, 10], dtype=float)
+response_timing_markers = response_timing_markers[response_timing_markers != -1.0]
 NUM_TESTS = correct_answers.size
 
 # Get the number of clips by counting the nubmer of clips in the folder
@@ -152,9 +152,15 @@ for i in iteration_indices:
 with open(TRIAL_NAME + "_RESULTS.csv", 'w') as reac_file:
     writer = csv.writer(reac_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
     writer.writerow(
-        ['1st number', '2nd number', 'User response', 'Time (from start) of user response', 'Correct answer', 'Accuracy (T/F)', 'Reaction time (s)',
-         'Reaction on time (T/F)', 'Clip Index'])
+        ['1st number', '2nd number', 'User response', 'Correct answer', 'Accuracy (T/F)', 'Reaction time (s)',
+         'Reaction on time (T/F)', 'Clip Index', ' ', ' ', 'Time (from start) of responses'])
     for i in range(NUM_TESTS):
-        writer.writerow([number_1_array[i], number_2_array[i], user_responses[i], response_timing_markers[i], correct_answers[i],
-                         accuracy_array[i], reaction_times[i], reaction_on_time[i], clip_index_array[i]])
+        if i >= len(response_timing_markers):
+            writer.writerow([number_1_array[i], number_2_array[i], user_responses[i], correct_answers[i],
+                             accuracy_array[i], reaction_times[i], reaction_on_time[i], clip_index_array[i], ' ',
+                             ' ', -1.0])
+        else:
+            writer.writerow([number_1_array[i], number_2_array[i], user_responses[i], correct_answers[i],
+                             accuracy_array[i], reaction_times[i], reaction_on_time[i], clip_index_array[i], ' ',
+                             ' ', response_timing_markers[i]])
 print("Done.")
