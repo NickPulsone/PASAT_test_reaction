@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env/python
 import numpy as np
 from pydub import silence, AudioSegment
 import csv
@@ -188,9 +188,13 @@ if __name__ == "__main__":
     with open(TRIAL_NAME + "_RESULTS.csv", 'w') as reac_file:
         writer = csv.writer(reac_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         writer.writerow(
-            ['1st number', '2nd number', 'User response', 'Time (from start) of user response', 'Correct answer', 'Accuracy (T/F)', 'Reaction time (s)',
-             'Reaction on time (T/F)', 'Clip Index'])
+            ['1st number', '2nd number', 'User response', 'Correct answer', 'Accuracy (T/F)', 'Reaction time (s)',
+             'Reaction on time (T/F)', 'Clip Index', ' ', ' ', 'Time (from start) of responses'])
         for i in range(NUM_TESTS):
-            writer.writerow([number_array[i], number_array[i + 1], raw_responses[i], response_timing_markers[i], answer_array[i],
-                             response_accuracies[i], reaction_times[i], reaction_on_time[i], clip_index_array[i]])
+            if i >= len(response_timing_markers):
+                writer.writerow([number_array[i], number_array[i + 1], raw_responses[i], answer_array[i],
+                                 response_accuracies[i], reaction_times[i], reaction_on_time[i], clip_index_array[i], ' ', ' ', -1.0])
+            else:
+                writer.writerow([number_array[i], number_array[i + 1], raw_responses[i], answer_array[i],
+                                 response_accuracies[i], reaction_times[i], reaction_on_time[i], clip_index_array[i], ' ', ' ', response_timing_markers[i]])
     print("Done.")
