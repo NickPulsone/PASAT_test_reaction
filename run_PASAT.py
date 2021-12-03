@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env/python
 import numpy as np
 from scipy.io import loadmat, wavfile
 from time import sleep, time
