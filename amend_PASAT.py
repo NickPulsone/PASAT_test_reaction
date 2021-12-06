@@ -55,6 +55,16 @@ reaction_times = np.array(data[:, 5], dtype=float)
 reaction_on_time = np.array(data[:, 6], dtype=str)
 clip_index_array = np.array(data[:, 7], dtype=int)
 response_timing_markers = np.array(data[:, 10], dtype=float)
+
+
+number_1_array = number_1_array[number_1_array != -1]
+number_2_array = number_2_array[number_2_array != -1]
+user_responses = user_responses[user_responses != '-1']
+correct_answers = correct_answers[correct_answers != -1]
+accuracy_array = accuracy_array[accuracy_array != '-1']
+reaction_times = reaction_times[reaction_times != -1]
+reaction_on_time = reaction_on_time[reaction_on_time != '-1']
+clip_index_array = clip_index_array[clip_index_array != -1]
 response_timing_markers = response_timing_markers[response_timing_markers != -1.0]
 NUM_TESTS = correct_answers.size
 
@@ -71,7 +81,6 @@ iteration_indices = np.empty(num_remove_clips, dtype=int)
 for i in range(num_remove_clips):
     iteration_indices[i] = np.where(clip_index_array == REMOVE_CLIPS[i])[0][0]
 clip_iteration_range = tuple(i for i in range(total_num_clips) if i not in REMOVE_CLIPS)
-print(clip_iteration_range)
 
 # Redo the analysis for the iterations ignoring the given remove indices
 # Init the speech to text recognizer
@@ -79,7 +88,7 @@ r = sr.Recognizer()
 for i in iteration_indices:
     # If there is no response after a time stamp, clearly the user failed to respond...
     rt = float('nan')
-    clip_index_array[i] = -1
+    clip_index_array[i] = -9999
     if stimuli_time_stamps[i] > response_timing_markers[-1]:
         accuracy_array[i] = "N/A"
         user_responses[i] = "N/A"
@@ -154,11 +163,14 @@ with open(TRIAL_NAME + "_RESULTS.csv", 'w') as reac_file:
     writer.writerow(
         ['1st number', '2nd number', 'User response', 'Correct answer', 'Accuracy (T/F)', 'Reaction time (s)',
          'Reaction on time (T/F)', 'Clip Index', ' ', ' ', 'Time (from start) of responses'])
-    for i in range(NUM_TESTS):
+    num_rows_in_table = max([len(response_timing_markers), len(correct_answers)])
+    for i in range(num_rows_in_table):
         if i >= len(response_timing_markers):
             writer.writerow([number_1_array[i], number_2_array[i], user_responses[i], correct_answers[i],
                              accuracy_array[i], reaction_times[i], reaction_on_time[i], clip_index_array[i], ' ',
                              ' ', -1.0])
+        elif i >= len(correct_answers):
+            writer.writerow([-1, -1, -1, -1, -1, -1, -1, -1, ' ', ' ', response_timing_markers[i]])
         else:
             writer.writerow([number_1_array[i], number_2_array[i], user_responses[i], correct_answers[i],
                              accuracy_array[i], reaction_times[i], reaction_on_time[i], clip_index_array[i], ' ',
