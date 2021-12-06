@@ -113,7 +113,7 @@ if __name__ == "__main__":
     for i in range(NUM_TESTS):
         # If there is no response after a time stamp, clearly the user failed to respond...
         rt = float('nan')
-        clip_index_array[i] = -1
+        clip_index_array[i] = -9999
         if stimuli_time_stamps[i] > response_timing_markers[-1]:
             response_accuracies.append("N/A")
             raw_responses.append("N/A")
@@ -190,10 +190,13 @@ if __name__ == "__main__":
         writer.writerow(
             ['1st number', '2nd number', 'User response', 'Correct answer', 'Accuracy (T/F)', 'Reaction time (s)',
              'Reaction on time (T/F)', 'Clip Index', ' ', ' ', 'Time (from start) of responses'])
-        for i in range(NUM_TESTS):
+        num_rows_in_table = max([len(response_timing_markers), len(answer_array)])
+        for i in range(num_rows_in_table):
             if i >= len(response_timing_markers):
                 writer.writerow([number_array[i], number_array[i + 1], raw_responses[i], answer_array[i],
                                  response_accuracies[i], reaction_times[i], reaction_on_time[i], clip_index_array[i], ' ', ' ', -1.0])
+            elif i >= len(answer_array):
+                writer.writerow([-1, -1, -1, -1, -1, -1, -1, -1, ' ', ' ', response_timing_markers[i]])
             else:
                 writer.writerow([number_array[i], number_array[i + 1], raw_responses[i], answer_array[i],
                                  response_accuracies[i], reaction_times[i], reaction_on_time[i], clip_index_array[i], ' ', ' ', response_timing_markers[i]])
