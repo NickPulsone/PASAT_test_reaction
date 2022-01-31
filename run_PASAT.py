@@ -48,33 +48,29 @@ if __name__ == "__main__":
     rec_sample_rate = 44100
     myrecording = sd.rec(int(rec_seconds * rec_sample_rate), samplerate=rec_sample_rate, channels=1)
     recording_start_time = datetime.datetime.now()
-    sleep(2)
+    sleep(DELAY)
 
     # Play the first sound and pause
-    stime = time()
     engine.say(str(number_array[0]))
     engine.runAndWait()
     engine.stop()
-    while (time() - stime) < DELAY:
-        sleep(0.01)
+    sleep(DELAY)
 
     # Run the tests, playing the rest of the sounds
     for i in range(1, (NUM_TESTS + 1)):
-        new_time = time()
         # Play the sound, record time
         engine.say(str(number_array[i]))
         stimuli_time_stamps[i - 1] = datetime.datetime.now()
         engine.runAndWait()
         engine.stop()
         # Pause
-        while (time() - new_time) < DELAY:
-            sleep(0.001)
+        sleep(DELAY)
 
     # Stop the main recording, save file as .wav
     print("Waiting for recording to stop...")
     sd.wait()
     wavfile.write(TRIAL_NAME + '.wav', rec_sample_rate, myrecording)
-
+    print("Done. Saving data...")
     # Calculate the time of each stimulus with respect to the start of the recording
     stimuli_time_stamps = np.array(
         [(stimuli_time_stamps[i] - recording_start_time).total_seconds() for i in range(NUM_TESTS)])
