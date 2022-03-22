@@ -9,17 +9,17 @@ from math import isnan
 
 """ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  TUNABLE PARAMETERS    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ """
 # Trial name (subject name, etc)
-TRIAL_NAME = "pasat_test1"
+TRIAL_NAME = "pasat_test2"
 CSV_FILENAME = TRIAL_NAME + ".csv"
 # Pause time in seconds
 DELAY = 2.0
 # Number of tests (Max 60)
-NUM_TESTS = 10
+NUM_TESTS = 40
 # NUM_TESTS = 60
 # The highest audio level (in dB) the program will determine to be considered "silence"
 SILENCE_THRESHOLD_DB = -20.0
 # The minimum period, in milliseconds, that could distinguish two different responses
-MIN_PERIOD_SILENCE_MS = 250
+MIN_PERIOD_SILENCE_MS = 100
 
 """ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ """
 WORD_TO_NUM = {"ONE": 1, "TWO": 2, "THREE": 3, "FOUR": 4, "FIVE": 5, "SIX": 6, "SEVEN": 7, "EIGHT": 8, "NINE": 9,
@@ -117,6 +117,7 @@ if __name__ == "__main__":
         if stimuli_time_stamps[i] > response_timing_markers[-1]:
             response_accuracies.append("N/A")
             raw_responses.append("N/A")
+            reaction_times.append(float('nan'))
         else:
             # Determine the most accurate nonsilent chunk that is associated with a given iteration
             for j in range(len(response_timing_markers)):
