@@ -2,36 +2,39 @@
 import numpy as np
 from scipy.io import loadmat, wavfile
 from time import sleep, time
-import pyttsx3
+import pyaudio
 import sounddevice as sd
 import datetime
 import csv
 
 """ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  TUNABLE PARAMETERS    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ """
 # Trial name (subject name, etc)
-TRIAL_NAME = "pasat_test1"
+TRIAL_NAME = "pasat_test2"
 # Name of the test sequence file
 TEST_QUESTION_FILENAME = "PASAT_versionA_HO.mat"
 # Pause time in seconds
 DELAY = 2.0
 # Number of tests (Max 60)
-NUM_TESTS = 10
+NUM_TESTS = 40
 # NUM_TESTS = 60
 """ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ """
 WORD_TO_NUM = {"ONE": 1, "TWO": 2, "THREE": 3, "FOUR": 4, "FIVE": 5, "SIX": 6, "SEVEN": 7, "EIGHT": 8, "NINE": 9,
                "TEN": 10}
 
 if __name__ == "__main__":
+    """
     # Initialize engine for TTS
     engine = pyttsx3.init()
     engine.setProperty('rate', 160)
     voices = engine.getProperty('voices')
     engine.setProperty('voice', voices[1].id)
+    """
 
-    # Load sound data
+    # Load sound and frequency data
     mat = loadmat(TEST_QUESTION_FILENAME)
     number_array = (mat["ind"])[::, 0]
     answer_array = (mat["answer"])[::, 0]
+    Number = loadmat("Number.mat")
 
     # Initialize array to contain time data
     stimuli_time_stamps = np.empty(NUM_TESTS, dtype=datetime.datetime)
@@ -44,27 +47,39 @@ if __name__ == "__main__":
     print("Starting the recording...")
 
     # Define recording parameters and start recording
-    rec_seconds = int(NUM_TESTS) * (DELAY + 1.0) + 5
+    rec_seconds = int(NUM_TESTS) * (DELAY + 1.7)
     rec_sample_rate = 44100
     myrecording = sd.rec(int(rec_seconds * rec_sample_rate), samplerate=rec_sample_rate, channels=1)
     recording_start_time = datetime.datetime.now()
     sleep(DELAY)
 
+    # Open a data stream to play audio
+    p = pyaudio.PyAudio()
+    fs = Number["Fs" + str(number_array[0])][0][0]
+    stream = p.open(format=pyaudio.paFloat32, channels=1, rate=fs, output=True)
+
     # Play the first sound and pause
-    engine.say(str(number_array[0]))
-    engine.runAndWait()
-    engine.stop()
-    sleep(DELAY)
+    number_sound = (Number["y" + str(number_array[0])])[:, 0]
+    stream.write(number_sound.astype(np.float32).tobytes())
+    htime = time()
+    while (time() - htime) < DELAY:
+        sleep(0.01)
 
     # Run the tests, playing the rest of the sounds
     for i in range(1, (NUM_TESTS + 1)):
         # Play the sound, record time
-        engine.say(str(number_array[i]))
+        number_sound = (Number["y" + str(number_array[i])])[:, 0]
+        stream.write(number_sound.astype(np.float32).tobytes())
         stimuli_time_stamps[i - 1] = datetime.datetime.now()
-        engine.runAndWait()
-        engine.stop()
+        htime = time()
         # Pause
-        sleep(DELAY)
+        while (time() - htime) < DELAY:
+            sleep(0.01)
+
+    # Close audio data stream
+    stream.stop_stream()
+    stream.close()
+    p.terminate()
 
     # Stop the main recording, save file as .wav
     print("Waiting for recording to stop...")
