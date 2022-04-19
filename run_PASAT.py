@@ -9,7 +9,7 @@ import csv
 
 """ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  TUNABLE PARAMETERS    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ """
 # Trial name (subject name, etc)
-TRIAL_NAME = "pasat_test2"
+TRIAL_NAME = "pasat_test_419_1"
 # Name of the test sequence file
 TEST_QUESTION_FILENAME = "PASAT_versionA_HO.mat"
 # Pause time in seconds
@@ -58,6 +58,9 @@ if __name__ == "__main__":
     fs = Number["Fs" + str(number_array[0])][0][0]
     stream = p.open(format=pyaudio.paFloat32, channels=1, rate=fs, output=True)
 
+    # Display first stimulus info
+    print(f"Initial audio: Number={number_array[0]}, Answer=N/A")
+
     # Play the first sound and pause
     number_sound = (Number["y" + str(number_array[0])])[:, 0]
     stream.write(number_sound.astype(np.float32).tobytes())
@@ -67,10 +70,12 @@ if __name__ == "__main__":
 
     # Run the tests, playing the rest of the sounds
     for i in range(1, (NUM_TESTS + 1)):
-        # Play the sound, record time
+        # Display current stimulus info
+        print(f"Stimulus {i}: Number={number_array[i]}, Answer={answer_array[i-1]}")
+        # Record the time, play the sound
         number_sound = (Number["y" + str(number_array[i])])[:, 0]
-        stream.write(number_sound.astype(np.float32).tobytes())
         stimuli_time_stamps[i - 1] = datetime.datetime.now()
+        stream.write(number_sound.astype(np.float32).tobytes())
         htime = time()
         # Pause
         while (time() - htime) < DELAY:
