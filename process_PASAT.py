@@ -9,7 +9,7 @@ from math import isnan
 
 """ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  TUNABLE PARAMETERS    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ """
 # Trial name (subject name, etc)
-TRIAL_NAME = "pasat_test2"
+TRIAL_NAME = "pasat_test_419_1"
 CSV_FILENAME = TRIAL_NAME + ".csv"
 # Pause time in seconds
 DELAY = 2.0
