@@ -9,12 +9,12 @@ from math import isnan
 
 """ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  TUNABLE PARAMETERS    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ """
 # Trial name (subject name, etc)
-TRIAL_NAME = "pasat_test_419_1"
+TRIAL_NAME = "pasat_test"
 CSV_FILENAME = TRIAL_NAME + ".csv"
 # Pause time in seconds
 DELAY = 2.0
 # Number of tests (Max 60)
-NUM_TESTS = 40
+NUM_TESTS = 30
 # NUM_TESTS = 60
 # The highest audio level (in dB) the program will determine to be considered "silence"
 SILENCE_THRESHOLD_DB = -20.0
