@@ -9,13 +9,13 @@ import csv
 
 """ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  TUNABLE PARAMETERS    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ """
 # Trial name (subject name, etc)
-TRIAL_NAME = "pasat_test_419_1"
+TRIAL_NAME = "pasat_test"
 # Name of the test sequence file
 TEST_QUESTION_FILENAME = "PASAT_versionA_HO.mat"
 # Pause time in seconds
 DELAY = 2.0
 # Number of tests (Max 60)
-NUM_TESTS = 40
+NUM_TESTS = 30
 # NUM_TESTS = 60
 """ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ """
 WORD_TO_NUM = {"ONE": 1, "TWO": 2, "THREE": 3, "FOUR": 4, "FIVE": 5, "SIX": 6, "SEVEN": 7, "EIGHT": 8, "NINE": 9,
