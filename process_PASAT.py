@@ -48,7 +48,7 @@ if __name__ == "__main__":
     number_array = np.append(number_array, number_array_step_inc[-1])
     answer_array = np.array(data[:, 2], dtype=int)
     stimuli_time_stamps = np.array(data[:, 3], dtype=float)
-    NUM_TESTS = stimuli_time_stamps.size
+    #NUM_TESTS = stimuli_time_stamps.size
 
     print("Interpret data (this may take a while)...")
     # Open .wav with pydub
